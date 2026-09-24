@@ -1,1 +1,255 @@
-import{c as P,f as L,u as O,o as _,j as t,a as k,b as $,B as F,r as c,d as S,F as C,T as R,S as z,I as y,e as U,g as A,h as v,i as G,k as V,L as W,l as Z,R as H,C as K}from"../index.esm.js";import{C as q,R as a,L as m,E as h,S as J}from"../types.js";var[Q,X]=P({name:"StatStylesContext",errorMessage:`useStatStyles returned is 'undefined'. Seems you forgot to wrap the components in "<Stat />" `}),M=L(function(s,r){const n=O("Stat",s),i={position:"relative",flex:"1 1 0%",...n.container},{className:g,children:d,...p}=_(s);return t.jsx(Q,{value:n,children:t.jsx(k.div,{ref:r,...p,className:$("chakra-stat",g),__css:i,children:t.jsx("dl",{children:d})})})});M.displayName="Stat";var B=L(function(s,r){const n=X();return t.jsx(k.dd,{ref:r,...s,className:$("chakra-stat__number",s.className),__css:{...n.number,fontFeatureSettings:"pnum",fontVariantNumeric:"proportional-nums"}})});B.displayName="StatNumber";function N({diameter:e,onClick:s,children:r,title:n,...i}){return t.jsx(F,{w:`${e}rem`,h:`${e}rem`,padding:`${e/2}rem`,borderRadius:9999,textAlign:"center",bgColor:"gray.100",boxSizing:"content-box",onClick:s,title:n,...i,children:r})}const T=1e3,E=60*T,D=60*E;function Y(e){if(e<=0)return"00:00";const s=Math.floor(e/D);e=e%D;const r=Math.floor(e/E);e=e%E;const n=Math.floor(e/T);return s?`${x(s)}:${x(r)}:${x(n)}`:`${x(r)}:${x(n)}`}function x(e,s=2){let r=String(e);const n=Math.pow(10,s-1);if(e<n)for(;String(n).length>r.length;)r=`0${e}`;return r}function ee({startTime:e,ticking:s}){const[r,n]=c.useState(Date.now()-e);return c.useEffect(()=>{if(!s)return;const i=setInterval(()=>{n(Date.now()-e)},100);return()=>clearInterval(i)},[e,s]),t.jsx(M,{textAlign:"center",mt:4,children:t.jsx(B,{fontSize:"3xl",children:Y(r)})})}const l=3,f=new q;function te(){const[e,s]=c.useState(a.IDLE),[r,n]=c.useState(""),[i,g]=c.useState(0),[d,p]=c.useState(null);return c.useEffect(()=>{const b=o=>{const{status:u,startTimestamp:j,pausedTimestamp:w}=o;s(u),j&&w?g(Date.now()-w+j):j&&g(j)};S.storage.local.get(m.recorderStatus).then(o=>{!o||!o[m.recorderStatus]||b(o[m.recorderStatus])}),S.storage.local.onChanged.addListener(o=>{if(!o[m.recorderStatus])return;const u=o[m.recorderStatus].newValue;b(u),u.errorMessage&&n(u.errorMessage)}),f.on(h.SessionUpdated,o=>{p(o.session)})},[]),t.jsxs(C,{direction:"column",w:300,padding:"5%",children:[t.jsxs(C,{children:[t.jsx(R,{fontSize:"md",fontWeight:"bold",children:"RRWeb Recorder"}),t.jsx(J,{}),t.jsxs(z,{direction:"row",children:[t.jsx(y,{onClick:()=>{S.tabs.create({url:"/pages/index.html#/"})},size:"xs",icon:t.jsx(U,{}),"aria-label":"Session List",title:"Session List"}),t.jsx(y,{onClick:()=>{S.runtime.openOptionsPage()},size:"xs",icon:t.jsx(A,{}),"aria-label":"Settings button",title:"Settings"})]})]}),e!==a.IDLE&&i&&t.jsx(ee,{startTime:i,ticking:e===a.RECORDING}),t.jsxs(C,{justify:"center",gap:"10",mt:"5",mb:"5",children:[t.jsx(N,{diameter:l,title:e===a.IDLE?"Start Recording":"Stop Recording",onClick:()=>{e===a.IDLE?f.emit(h.StartButtonClicked,{}):f.emit(h.StopButtonClicked,{})},children:t.jsx(v,{w:`${l}rem`,h:`${l}rem`,borderRadius:e===a.IDLE?9999:6,margin:"0",bgColor:"red.500"})}),e!==a.IDLE&&t.jsx(N,{diameter:l,title:e===a.RECORDING?"Pause Recording":"Resume Recording",onClick:()=>{e===a.RECORDING?f.emit(h.PauseButtonClicked,{}):f.emit(h.ResumeButtonClicked,{})},children:t.jsxs(v,{w:`${l}rem`,h:`${l}rem`,borderRadius:9999,margin:"0",color:"gray.600",children:[[a.PAUSED,a.PausedSwitch].includes(e)&&t.jsx(G,{style:{paddingLeft:"0.5rem",width:"100%",height:"100%"}}),e===a.RECORDING&&t.jsx(V,{style:{width:"100%",height:"100%"}})]})})]}),d&&t.jsxs(R,{children:[t.jsx(R,{as:"b",children:"New Session: "}),t.jsx(W,{href:S.runtime.getURL(`pages/index.html#/session/${d.id}`),isExternal:!0,children:d.name})]}),r!==""&&t.jsxs(R,{color:"red.500",fontSize:"md",children:[r,t.jsx("br",{}),"Maybe refresh your current tab."]})]})}const I=document.getElementById("root");I&&Z(I).render(t.jsx(H.StrictMode,{children:t.jsx(K,{children:t.jsx(te,{})})}));
+/**
+ * WebICU Bauhaus Extension Popup Controller
+ * Sleek, high-density Master Dispatch companion
+ */
+
+let recorderStatus = { status: 'IDLE', activeTabId: -1, startTimestamp: 0, pausedTimestamp: 0 };
+let activeTabInfo = { id: -1, title: 'Loading...', url: '' };
+let timerInterval = null;
+let lastSession = null;
+
+function formatClock(seconds) {
+  const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+  const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+  const secs = String(seconds % 60).padStart(2, '0');
+  return `${hrs}:${mins}:${secs}`;
+}
+
+function getElapsedSeconds() {
+  if (recorderStatus.status === 'IDLE' || !recorderStatus.startTimestamp) return 0;
+  if (recorderStatus.status === 'PAUSED' && recorderStatus.pausedTimestamp) {
+    return Math.floor((recorderStatus.pausedTimestamp - recorderStatus.startTimestamp) / 1000);
+  }
+  return Math.floor((Date.now() - recorderStatus.startTimestamp) / 1000);
+}
+
+function updateClock() {
+  const clockEl = document.getElementById('popup-clock');
+  if (clockEl) {
+    clockEl.textContent = formatClock(getElapsedSeconds());
+  }
+}
+
+async function fetchActiveTab() {
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tabs && tabs[0]) {
+      activeTabInfo = tabs[0];
+    }
+  } catch (e) {
+    console.warn('Could not query active tab:', e);
+  }
+}
+
+async function fetchStatus() {
+  try {
+    const res = await chrome.storage.local.get('recorder_status');
+    if (res && res.recorder_status) {
+      recorderStatus = res.recorder_status;
+    }
+  } catch (e) {
+    console.warn('Could not fetch recorder status:', e);
+  }
+}
+
+function sendEvent(eventName, detail = {}) {
+  const msg = JSON.stringify({ type: 'event', event: eventName, detail });
+  chrome.runtime.sendMessage(msg);
+}
+
+function render() {
+  const root = document.getElementById('popup-root');
+  if (!root) return;
+
+  const isRec = recorderStatus.status === 'RECORDING';
+  const isPaused = recorderStatus.status === 'PAUSED';
+  const isIdle = recorderStatus.status === 'IDLE';
+
+  let domain = 'about:blank';
+  try {
+    if (activeTabInfo.url) {
+      const u = new URL(activeTabInfo.url);
+      domain = u.hostname || activeTabInfo.url;
+    }
+  } catch (e) {
+    domain = activeTabInfo.url || 'browser-tab';
+  }
+
+  root.innerHTML = `
+    <div class="flex flex-col bg-surface min-h-[480px] p-4 text-on-surface">
+      <!-- HEADER BAR -->
+      <div class="bg-surface-container-high border-2 border-on-surface p-3 flex items-center justify-between shadow-tectonic-xs">
+        <div class="flex items-center gap-2">
+          <div class="brand-circle"></div>
+          <div class="brand-square"></div>
+          <div class="brand-triangle"></div>
+          <span class="font-display text-xs font-bold uppercase tracking-wider ml-1">RRWEB // BAUHAUS</span>
+        </div>
+        <span class="chip-bauhaus ${isRec ? 'bg-primary text-white' : 'bg-surface-container-lowest text-on-surface'}">
+          ${isRec ? 'REC' : (isPaused ? 'PAUSED' : 'IDLE')}
+        </span>
+      </div>
+
+      <!-- TARGET TAB CARD -->
+      <div class="bg-surface-container-lowest border-2 border-on-surface p-3 mt-3 shadow-tectonic-xs flex flex-col gap-1">
+        <div class="flex items-center justify-between font-display text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+          <span>TARGET TAB ATTACHMENT</span>
+          <span class="text-secondary">#${activeTabInfo.id}</span>
+        </div>
+        <div class="font-display text-xs font-bold text-on-surface truncate" title="${activeTabInfo.title || ''}">
+          ${activeTabInfo.title || 'Active Tab'}
+        </div>
+        <div class="font-mono text-[11px] text-on-surface-variant truncate">
+          ${domain}
+        </div>
+      </div>
+
+      <!-- MASTER DISPATCH CONTROLLER -->
+      <div class="bg-surface-container-lowest border-2 border-on-surface p-4 mt-3 shadow-tectonic flex flex-col items-center justify-center relative">
+        <div class="font-display text-[10px] font-bold uppercase text-on-surface-variant tracking-widest self-start mb-2">
+          [ MASTER DISPATCH ]
+        </div>
+
+        <div class="relative w-36 h-36 rounded-full bg-tertiary-container border-2 border-on-surface flex items-center justify-center shadow-tectonic-sm my-1 cursor-pointer transition-transform active:scale-95" style="border-radius: 50% !important;">
+          <button id="popup-dispatch-btn" class="w-20 h-20 rounded-full border-2 border-on-surface flex flex-col items-center justify-center shadow-tectonic-xs cursor-pointer ${isRec ? 'bg-inverse-surface text-white' : 'bg-primary text-white'}" style="border-radius: 50% !important;">
+            <span class="material-symbols-outlined text-3xl">
+              ${isRec ? 'stop' : (isPaused ? 'play_arrow' : 'fiber_manual_record')}
+            </span>
+            <span class="font-display text-[9px] font-bold uppercase tracking-widest mt-0.5">
+              ${isRec ? 'HALT' : (isPaused ? 'RESUME' : 'ARMED')}
+            </span>
+          </button>
+        </div>
+
+        <div class="mt-2 flex flex-col items-center">
+          <span id="popup-clock" class="font-display text-3xl font-bold font-mono tracking-tight text-on-surface">
+            ${formatClock(getElapsedSeconds())}
+          </span>
+          <span class="font-display text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mt-1">
+            ${isRec ? 'RECORDING STREAM ACTIVE' : 'CDP NETWORK &amp; RRWEB HOOK'}
+          </span>
+        </div>
+
+        ${!isIdle ? `
+          <div class="flex items-center gap-2 mt-3 w-full">
+            <button id="popup-pause-btn" class="btn-bauhaus flex-1 text-xs py-1.5 font-bold">
+              <span class="material-symbols-outlined text-sm">${isPaused ? 'play_arrow' : 'pause'}</span>
+              ${isPaused ? 'RESUME' : 'PAUSE'}
+            </button>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- LAST SAVED SESSION NOTIFICATION -->
+      ${lastSession ? `
+        <div class="bg-surface-container-high border-2 border-on-surface p-2 mt-3 shadow-tectonic-xs flex items-center justify-between text-xs">
+          <div class="truncate mr-2">
+            <span class="font-display font-bold text-[10px] uppercase text-on-surface-variant block">NEW ARCHIVE:</span>
+            <span class="font-display font-bold truncate">${lastSession.name || 'session'}</span>
+          </div>
+          <button id="popup-open-last-btn" class="btn-bauhaus btn-bauhaus-secondary text-[10px] py-1 px-2 shrink-0">
+            VIEW
+          </button>
+        </div>
+      ` : ''}
+
+      <!-- ERROR MESSAGE -->
+      ${recorderStatus.errorMessage ? `
+        <div class="bg-error-container text-on-error-container border border-error p-2 mt-3 font-mono text-[11px]">
+          ${escapeHtml(recorderStatus.errorMessage)}
+        </div>
+      ` : ''}
+
+      <!-- QUICK NAVIGATION ACTION TILES -->
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button id="popup-open-workbench-btn" class="btn-bauhaus btn-bauhaus-secondary text-[11px] py-2 flex items-center justify-center gap-1 shadow-tectonic-xs">
+          <span class="material-symbols-outlined text-base">play_circle</span>
+          <span>WORKBENCH</span>
+        </button>
+        <button id="popup-open-engine-btn" class="btn-bauhaus btn-bauhaus-tertiary text-[11px] py-2 flex items-center justify-center gap-1 shadow-tectonic-xs">
+          <span class="material-symbols-outlined text-base">settings_input_component</span>
+          <span>STORAGE HUB</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  attachPopupEvents();
+}
+
+function attachPopupEvents() {
+  const dispatchBtn = document.getElementById('popup-dispatch-btn');
+  if (dispatchBtn) {
+    dispatchBtn.addEventListener('click', () => {
+      if (recorderStatus.status === 'RECORDING') {
+        sendEvent('stop-recording-button-clicked');
+      } else if (recorderStatus.status === 'PAUSED') {
+        sendEvent('resume-recording-button-clicked');
+      } else {
+        sendEvent('start-recording-button-clicked');
+      }
+    });
+  }
+
+  const pauseBtn = document.getElementById('popup-pause-btn');
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', () => {
+      if (recorderStatus.status === 'RECORDING') {
+        sendEvent('pause-recording-button-clicked');
+      } else if (recorderStatus.status === 'PAUSED') {
+        sendEvent('resume-recording-button-clicked');
+      }
+    });
+  }
+
+  const openWorkbenchBtn = document.getElementById('popup-open-workbench-btn');
+  if (openWorkbenchBtn) {
+    openWorkbenchBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: '/pages/index.html#/' });
+    });
+  }
+
+  const openEngineBtn = document.getElementById('popup-open-engine-btn');
+  if (openEngineBtn) {
+    openEngineBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: '/pages/index.html#/engine' });
+    });
+  }
+
+  const openLastBtn = document.getElementById('popup-open-last-btn');
+  if (openLastBtn && lastSession) {
+    openLastBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: `/pages/index.html#/session/${lastSession.id}` });
+    });
+  }
+}
+
+// Initialize Popup
+(async function initPopup() {
+  await fetchActiveTab();
+  await fetchStatus();
+  render();
+
+  timerInterval = setInterval(() => {
+    if (recorderStatus.status === 'RECORDING') {
+      updateClock();
+    }
+  }, 500);
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.recorder_status) {
+      recorderStatus = changes.recorder_status.newValue;
+      render();
+    }
+  });
+
+  chrome.runtime.onMessage.addListener((raw) => {
+    try {
+      const msg = JSON.parse(raw);
+      if (msg.type === 'event' && msg.event === 'session-updated') {
+        lastSession = msg.detail?.session || null;
+        render();
+      }
+    } catch (e) {}
+  });
+})();

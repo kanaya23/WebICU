@@ -1,0 +1,546 @@
+/* Bauhaus Telemetry System CSS Framework */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+  --surface: #fcf9f8;
+  --on-surface: #1c1b1b;
+  --surface-dim: #dcd9d9;
+  --surface-bright: #fcf9f8;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f6f3f2;
+  --surface-container: #f0edec;
+  --surface-container-high: #ebe7e7;
+  --surface-container-highest: #e5e2e1;
+  --surface-variant: #e5e2e1;
+  --on-surface-variant: #5b403d;
+  --inverse-surface: #313030;
+  --inverse-on-surface: #f3f0ef;
+  --outline: #8f6f6c;
+  --outline-variant: #e4beb9;
+  --primary: #b61819;
+  --on-primary: #ffffff;
+  --primary-container: #da352e;
+  --on-primary-container: #fffbff;
+  --secondary: #255abb;
+  --on-secondary: #ffffff;
+  --secondary-container: #6c98fd;
+  --on-secondary-container: #002f74;
+  --tertiary: #715d00;
+  --tertiary-container: #caa800;
+  --on-tertiary-container: #4c3e00;
+  --tertiary-fixed: #ffe176;
+  --tertiary-fixed-dim: #e9c31c;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container);
+  border: 1px solid var(--on-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--on-surface);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Typography Helpers */
+.font-display { font-family: var(--font-display) !important; }
+.font-body { font-family: var(--font-body) !important; }
+.font-mono { font-family: var(--font-mono) !important; }
+
+/* Border radius 0 standard */
+button, input, select, textarea, .bauhaus-card, .bauhaus-box, .bauhaus-chip, table, th, td {
+  border-radius: 0 !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Color utility classes mapping to Bauhaus tokens */
+.bg-surface { background-color: var(--surface) !important; }
+.bg-surface-container-lowest { background-color: var(--surface-container-lowest) !important; }
+.bg-surface-container-low { background-color: var(--surface-container-low) !important; }
+.bg-surface-container { background-color: var(--surface-container) !important; }
+.bg-surface-container-high { background-color: var(--surface-container-high) !important; }
+.bg-surface-container-highest { background-color: var(--surface-container-highest) !important; }
+.bg-surface-variant { background-color: var(--surface-variant) !important; }
+.bg-inverse-surface { background-color: var(--inverse-surface) !important; }
+.bg-primary { background-color: var(--primary) !important; }
+.bg-secondary { background-color: var(--secondary) !important; }
+.bg-tertiary-container { background-color: var(--tertiary-container) !important; }
+.bg-on-surface { background-color: var(--on-surface) !important; }
+
+.text-surface { color: var(--surface) !important; }
+.text-on-surface { color: var(--on-surface) !important; }
+.text-on-surface-variant { color: var(--on-surface-variant) !important; }
+.text-inverse-on-surface { color: var(--inverse-on-surface) !important; }
+.text-primary { color: var(--primary) !important; }
+.text-secondary { color: var(--secondary) !important; }
+.text-tertiary { color: var(--tertiary) !important; }
+.text-tertiary-container { color: var(--on-tertiary-container) !important; }
+.text-tertiary-fixed { color: var(--tertiary-fixed) !important; }
+
+.border-on-surface { border-color: var(--on-surface) !important; }
+.border-surface-variant { border-color: var(--surface-variant) !important; }
+.border-primary { border-color: var(--primary) !important; }
+.border-secondary { border-color: var(--secondary) !important; }
+.border-error { border-color: var(--error) !important; }
+
+/* Tectonic Shadows */
+.shadow-tectonic-xs { box-shadow: 2px 2px 0px var(--on-surface) !important; }
+.shadow-tectonic-sm { box-shadow: 3px 3px 0px var(--on-surface) !important; }
+.shadow-tectonic { box-shadow: 4px 4px 0px var(--on-surface) !important; }
+.shadow-tectonic-lg { box-shadow: 6px 6px 0px var(--on-surface) !important; }
+.shadow-tectonic-red { box-shadow: 3px 3px 0px var(--primary) !important; }
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+}
+
+/* Core Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 256px;
+  background-color: var(--surface-container-lowest);
+  border-right: 2px solid var(--on-surface);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-header {
+  height: 64px;
+  padding: 0 16px;
+  border-bottom: 2px solid var(--on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-container-low);
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50% !important;
+  background-color: var(--primary);
+}
+.brand-square {
+  width: 16px;
+  height: 16px;
+  background-color: var(--secondary);
+}
+.brand-triangle {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 16px solid var(--tertiary-container);
+}
+.brand-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-left: 6px;
+}
+
+.project-badge {
+  padding: 8px 16px;
+  background-color: var(--surface-container-high);
+  border-bottom: 2px solid var(--on-surface);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  border-bottom: 1px solid var(--surface-variant);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  user-select: none;
+  transition: none;
+}
+.nav-item:hover {
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+}
+.nav-item:hover .nav-num {
+  color: var(--on-secondary);
+}
+.nav-item.active {
+  background-color: var(--primary);
+  color: var(--on-primary);
+  border-top: 2px solid var(--on-surface);
+  border-bottom: 2px solid var(--on-surface);
+}
+.nav-item.active .nav-num {
+  color: var(--on-primary);
+}
+.nav-num {
+  font-size: 11px;
+  margin-right: 12px;
+  color: var(--secondary);
+}
+.nav-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.sidebar-footer {
+  border-top: 2px solid var(--on-surface);
+  background-color: var(--surface-container-low);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Top App Header */
+.main-wrapper {
+  margin-left: 256px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-header {
+  position: sticky;
+  top: 0;
+  height: 64px;
+  background-color: var(--surface-container-lowest);
+  border-bottom: 2px solid var(--on-surface);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.top-tabs {
+  display: flex;
+  height: 100%;
+}
+.top-tab {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--on-surface-variant);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-right: 1px solid var(--surface-variant);
+  cursor: pointer;
+}
+.top-tab:hover {
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+}
+.top-tab.active {
+  background-color: var(--on-surface);
+  color: var(--surface-container-lowest);
+}
+
+.top-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Bauhaus Buttons */
+.btn-bauhaus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 2px solid var(--on-surface);
+  cursor: pointer;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  user-select: none;
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+.btn-bauhaus:hover {
+  background-color: var(--surface-variant);
+}
+.btn-bauhaus:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
+
+.btn-bauhaus-primary {
+  background-color: var(--primary) !important;
+  color: var(--on-primary) !important;
+}
+.btn-bauhaus-primary:hover {
+  background-color: var(--on-surface) !important;
+  color: var(--surface-container-lowest) !important;
+}
+
+.btn-bauhaus-secondary {
+  background-color: var(--secondary) !important;
+  color: var(--on-secondary) !important;
+}
+.btn-bauhaus-secondary:hover {
+  background-color: #00419c !important;
+}
+
+.btn-bauhaus-tertiary {
+  background-color: var(--tertiary-container) !important;
+  color: var(--on-tertiary-container) !important;
+}
+.btn-bauhaus-tertiary:hover {
+  background-color: var(--tertiary-fixed-dim) !important;
+}
+
+.btn-bauhaus-dark {
+  background-color: var(--inverse-surface) !important;
+  color: var(--inverse-on-surface) !important;
+}
+.btn-bauhaus-dark:hover {
+  background-color: var(--on-surface) !important;
+}
+
+/* Badges & Chips */
+.chip-bauhaus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--on-surface);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--on-surface);
+}
+.status-200 { background-color: var(--secondary); color: var(--on-secondary); }
+.status-300 { background-color: var(--tertiary-container); color: var(--on-tertiary-container); }
+.status-400 { background-color: var(--primary); color: var(--on-primary); }
+.status-500 { background-color: var(--error); color: var(--on-error); font-weight: 900; }
+
+/* Tables */
+.bauhaus-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.bauhaus-table th {
+  background-color: var(--surface-container);
+  border-bottom: 2px solid var(--on-surface);
+  border-right: 2px solid var(--on-surface);
+  padding: 8px 12px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.bauhaus-table th:last-child {
+  border-right: none;
+}
+.bauhaus-table td {
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--on-surface);
+  border-right: 2px solid var(--on-surface);
+}
+.bauhaus-table td:last-child {
+  border-right: none;
+}
+.bauhaus-table tbody tr:hover {
+  background-color: var(--surface-container-high);
+}
+.bauhaus-table tbody tr.selected {
+  outline: 2px solid var(--secondary);
+  background-color: var(--surface-container-high);
+}
+
+/* Inputs */
+.input-bauhaus {
+  height: 36px;
+  padding: 0 12px;
+  background-color: var(--surface-container-lowest);
+  border: 2px solid var(--on-surface);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.input-bauhaus:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+/* Mechanical Scrubber & Timeline */
+.scrubber-track {
+  position: relative;
+  height: 28px;
+  background-color: var(--surface-container);
+  border: 2px solid var(--on-surface);
+  cursor: pointer;
+  overflow: visible;
+}
+.scrubber-fill {
+  height: 100%;
+  background-color: var(--tertiary-container);
+  border-right: 2px solid var(--on-surface);
+  transition: width 0.05s linear;
+}
+.scrubber-thumb {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 14px;
+  background-color: var(--on-surface);
+  border: 2px solid var(--surface-container-lowest);
+  margin-left: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  z-index: 20;
+}
+.scrubber-thumb::after {
+  content: '';
+  width: 2px;
+  height: 12px;
+  background-color: var(--tertiary-container);
+}
+.milestone-error {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--primary);
+  border-left: 1px solid var(--on-surface);
+  border-right: 1px solid var(--on-surface);
+  z-index: 15;
+}
+.milestone-network {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background-color: var(--secondary);
+  z-index: 12;
+}
+
+/* Telemetry Ribbon Card */
+.ribbon-card {
+  padding: 12px 16px;
+  background-color: var(--surface);
+  border: 2px solid var(--on-surface);
+  box-shadow: 3px 3px 0px var(--on-surface);
+}
+
+/* Toast Notification */
+.toast-banner {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: var(--inverse-surface);
+  color: var(--inverse-on-surface);
+  padding: 12px 20px;
+  box-shadow: 4px 4px 0px var(--on-surface);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  border: 2px solid var(--on-surface);
+}
+
+/* Popup specific adjustments */
+body.popup-body {
+  width: 360px;
+  min-height: 480px;
+  background-color: var(--surface);
+  overflow-x: hidden;
+}
