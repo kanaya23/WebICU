@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "rrweb",
+  "version": "2.1.6",
+  "version_name": "2.1.6",
+  "author": "rrweb Core Team <maintainers@rrweb.com>",
+  "action": {
+    "browser_style": false,
+    "default_popup": "popup/popup.html",
+    "default_title": "rrweb extension"
+  },
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "js": [
+        "content/index.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "options_ui": {
+    "open_in_tab": true,
+    "page": "options/index.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "unlimitedStorage",
+    "debugger",
+    "tabs",
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "**/*.js"
+      ]
+    }
+  ]
+}
