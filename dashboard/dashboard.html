@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebICU // Session Studio</title>
+  <link rel="stylesheet" href="../vendor/rrweb.css">
+  <link rel="stylesheet" href="../vendor/rrweb-player.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="icon" type="image/svg+xml" href="../icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="48x48" href="../icons/icon48.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../icons/icon16.png">
+  <link rel="shortcut icon" href="../icons/icon48.png">
+  <link rel="apple-touch-icon" href="../icons/icon128.png">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navbar (Fixed 48px) -->
+    <header class="navbar">
+      <div class="nav-left">
+        <div class="nav-brand">
+          <img src="../icons/icon48.png" alt="WebICU" width="24" height="24" class="nav-logo" style="border-radius: 5px; margin-right: 8px; display: block;">
+          <span class="nav-title">WebICU</span>
+        </div>
+        <nav class="nav-tabs" id="mainNavTabs">
+          <button class="nav-tab active" data-view="sessions" id="navTabSessions">
+            <span>Sessions</span>
+          </button>
+          <button class="nav-tab" data-view="player" id="navTabPlayer">
+            <span>Replayer</span>
+          </button>
+          <button class="nav-tab" data-view="storage" id="navTabStorage">
+            <span>Storage</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="nav-actions">
+        <span class="nav-status-badge" id="navRecordingBadge">STANDBY</span>
+        <label for="importJsonInput" class="btn btn-secondary">
+          <span>Import JSON</span>
+          <input type="file" id="importJsonInput" accept=".json" style="display: none;">
+        </label>
+        <button id="clearAllBtn" class="btn btn-outline-danger">Purge All</button>
+      </div>
+    </header>
+
+    <!-- Main Views Area -->
+    <main class="main-content">
+      <!-- VIEW 1: SESSIONS ARCHIVE LIST -->
+      <section id="sessionsListView" class="view-panel active scrollable-view">
+        <div class="panel-header-bar">
+          <div class="panel-header-title">
+            <h1 class="header-main-title">Recorded Sessions</h1>
+            <span id="sessionCountBadge" class="counter-badge">0 sessions</span>
+          </div>
+
+          <div class="panel-search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search sessions by title or URL...">
+          </div>
+        </div>
+
+        <div class="sessions-container">
+          <div id="sessionsContainer" class="sessions-grid">
+            <!-- Dynamic session cards injected via dashboard.js -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-icon">
+              <span class="motif-circle" style="width:28px; height:28px; background:var(--color-primary);"></span>
+            </div>
+            <h2 class="empty-title">No Recorded Sessions Yet</h2>
+            <p class="empty-desc">
+              Click the <strong>Rolling-WebICU</strong> extension icon on any webpage and select <strong>"Start Recording"</strong> to capture your first session.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: REPLAYER & DEVTOOLS WORKBENCH -->
+      <section id="playerView" class="view-panel">
+        <!-- Replayer Toolbar (Fixed 40px) -->
+        <div class="player-toolbar">
+          <div class="toolbar-left">
+            <button id="backToListBtn" class="btn btn-secondary btn-back" title="Back to Sessions Archive">
+              <span>← Sessions</span>
+            </button>
+            <div class="session-meta-display">
+              <span id="playerSessionTitle" class="session-display-title">#0x0000</span>
+              <span class="meta-separator">•</span>
+              <span id="playerUrlDisplay" class="session-display-url">chrome-extension://local-session</span>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <div id="playerMetaBadges" class="session-stat-chips"></div>
+            <button id="toggleInspectorBtn" class="btn btn-secondary" title="Toggle Inspector Panel">
+              <span id="inspectorToggleText">Hide Inspector</span>
+            </button>
+            <button id="btnExportZipArchive" class="btn btn-primary" title="Export Structured ZIP (Progressive Snapshots, Actions & Causality, Timeline)">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right: 4px; display: inline-block; vertical-align: -2px;"><path d="M2.5 5.5l5.5-3 5.5 3v6l-5.5 3-5.5-3v-6z"/><path d="M2.5 5.5l5.5 3 5.5-3"/><path d="M8 8.5v6"/></svg>
+              <span>Export ZIP</span>
+            </button>
+            <button id="exportCurrentBtn" class="btn btn-secondary" title="Download Raw Replay JSON">
+              <span>JSON</span>
+            </button>
+            <button id="deleteCurrentBtn" class="btn btn-outline-danger" title="Delete Session">
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Workbench Grid: Replayer Stage (Left) & Inspector (Right) -->
+        <div class="workbench-grid" id="workbenchGrid">
+          <!-- LEFT / CENTER: THEATER SUITE -->
+          <div class="stage-panel" id="stagePanel">
+            <!-- Replayer Viewport Container (Auto-Fitting Studio Canvas) -->
+            <div class="stage-viewport-container" id="stageViewportContainer">
+              <div id="webicuPlayerMount" class="player-mount"></div>
+            </div>
+
+            <!-- Bauhaus Mechanical Playback Bar -->
+            <div class="playback-bar-container" id="playbackBarContainer">
+              <!-- Scrubber Track & Markers -->
+              <div class="scrubber-row">
+                <span class="playback-time" id="playbackTimeCurrent">00:00.00</span>
+                <div class="scrubber-track" id="playbackScrubberTrack" title="Seek / Drag Playhead">
+                  <div class="scrubber-progress" id="playbackProgressBar"></div>
+                  <div id="playbackMilestones"></div>
+                  <div class="scrubber-thumb" id="playbackScrubberThumb" style="left: 0%;">
+                    <span class="scrubber-thumb-pip"></span>
+                  </div>
+                </div>
+                <span class="playback-time time-total" id="playbackTimeTotal">00:00.00</span>
+              </div>
+
+              <!-- Controls Row: Play/Pause, Step, Speed, Inactivity -->
+              <div class="playback-controls-row">
+                <div class="playback-btn-group">
+                  <!-- Play/Pause Button -->
+                  <button class="btn-play-pause" id="btnPlayPause" title="Toggle Playback [Space]">
+                    <span id="playPauseIconContainer">
+                      <svg id="iconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none; margin-left: 2px;"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                      <svg id="iconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+                    </span>
+                  </button>
+
+                  <!-- Step Buttons -->
+                  <button class="btn-step" id="btnStepBack" title="Step Backward 500ms">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+                  </button>
+                  <button class="btn-step" id="btnStepForward" title="Step Forward 500ms">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+                  </button>
+
+                  <div class="ctrl-divider"></div>
+
+                  <!-- Skip Inactivity -->
+                  <button class="btn-skip-inactive active" id="btnToggleSkipInactive" title="Toggle Skipping Inactivity">
+                    <span class="skip-indicator-dot"></span>
+                    <span>Skip Inactivity</span>
+                  </button>
+                </div>
+
+                <!-- Speed Stark Tiles -->
+                <div class="speed-tile-group" id="speedTileGroup">
+                  <span class="speed-label">SPEED</span>
+                  <button type="button" class="speed-btn" data-speed="0.5">0.5×</button>
+                  <button type="button" class="speed-btn active" data-speed="1.0">1.0×</button>
+                  <button type="button" class="speed-btn" data-speed="2.0">2.0×</button>
+                  <button type="button" class="speed-btn" data-speed="4.0">4.0×</button>
+                  <button type="button" class="speed-btn" data-speed="8.0">8.0×</button>
+                </div>
+
+                <!-- Frame Indexing -->
+                <div class="frame-indexing">
+                  <span class="frame-label">FRAME</span>
+                  <span class="frame-badge" id="playbackFrameBadge">#00,001</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: MAKER SUITE INSPECTOR (Ergonomic 400px sidebar) -->
+          <div class="devtools-panel" id="devtoolsPanel">
+            <!-- Inspector Multi-Tab Navigation -->
+            <nav class="inspector-tabs" id="inspectorTabsNav">
+              <button class="insp-tab active" data-insp-tab="actions" id="tabInspActions">
+                <span>01 Causality</span>
+                <span class="tab-badge-num" id="inspActionsCount">0</span>
+              </button>
+              <button class="insp-tab" data-insp-tab="snapshots" id="tabInspSnapshots">
+                <span>02 Snapshots</span>
+                <span class="tab-badge-num" id="inspSnapshotsCount">0</span>
+              </button>
+              <button class="insp-tab" data-insp-tab="events" id="tabInspEvents">
+                <span>03 Raw Stream</span>
+              </button>
+              <button class="insp-tab" data-insp-tab="network" id="tabInspNetwork">
+                <span>04 Network</span>
+                <span class="tab-badge-num" id="inspNetworkCount">0</span>
+              </button>
+            </nav>
+
+            <!-- TAB 1: ACTIONS & CAUSALITY VIEW -->
+            <div class="insp-subpanel active" id="panelInspActions">
+              <div class="subpanel-header">
+                <span class="subpanel-title">Semantic Interaction Trajectory</span>
+                <span class="subpanel-hint">Actions paired with spawned UI</span>
+              </div>
+              <div class="actions-list-scroll" id="actionsListContainer">
+                <!-- Dynamically populated via dashboard.js -->
+              </div>
+            </div>
+
+            <!-- TAB 2: PROGRESSIVE SNAPSHOTS VIEW -->
+            <div class="insp-subpanel" id="panelInspSnapshots">
+              <div class="subpanel-header">
+                <span class="subpanel-title">Progressive DOM Snapshots</span>
+                <span class="subpanel-hint">Whole-page baseline & route changes</span>
+              </div>
+              <div class="snapshots-list-scroll" id="snapshotsListContainer">
+                <!-- Dynamically populated via dashboard.js -->
+              </div>
+            </div>
+
+            <!-- TAB 3: RAW EVENT STREAM & JSON VIEW -->
+            <div class="insp-subpanel" id="panelInspEvents">
+              <!-- Filter Bar -->
+              <div class="inspector-filter-bar">
+                <input type="text" id="eventFilterInput" class="inspector-search" placeholder="Filter events by type or data...">
+                <div class="filter-pills" id="eventFilterPills">
+                  <button type="button" class="filter-pill active" data-type="all">All (<span id="eventInspectorCount">0</span>)</button>
+                  <button type="button" class="filter-pill" data-type="snapshot">Snapshots</button>
+                  <button type="button" class="filter-pill" data-type="mutation">Mutations</button>
+                </div>
+              </div>
+
+              <!-- Upper: Waterfall / Event Stream Table -->
+              <div class="event-table-scroll">
+                <table class="event-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 44px;">#</th>
+                      <th style="width: 95px;">Type</th>
+                      <th style="width: 65px;">Offset</th>
+                      <th>Summary</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventTableBody">
+                    <!-- Populated dynamically via dashboard.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Lower: Raw JSON Inspector -->
+              <div class="raw-inspector-box">
+                <div class="raw-inspector-header">
+                  <span id="selectedEventHeader">Event Payload Details</span>
+                  <button id="btnCopyJsonPayload" class="btn-micro" title="Copy Raw JSON to Clipboard">Copy</button>
+                </div>
+                <pre class="raw-json-viewer" id="rawJsonViewer">// Click any event above to inspect its decoded payload</pre>
+              </div>
+            </div>
+
+            <!-- TAB 4: NETWORK CAPTURE & CAUSALITY VIEW -->
+            <div class="insp-subpanel" id="panelInspNetwork">
+              <!-- Filter Bar -->
+              <div class="inspector-filter-bar">
+                <input type="text" id="networkFilterInput" class="inspector-search" placeholder="Filter requests by URL, method, status...">
+                <div class="filter-pills" id="networkFilterPills">
+                  <button type="button" class="filter-pill active" data-net-filter="all">All (<span id="netFilterAllCount">0</span>)</button>
+                  <button type="button" class="filter-pill" data-net-filter="action">Action-Linked</button>
+                  <button type="button" class="filter-pill" data-net-filter="error">Errors</button>
+                </div>
+              </div>
+
+              <!-- Upper: Waterfall / Request Table -->
+              <div class="event-table-scroll network-table-scroll">
+                <table class="event-table network-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 36px;">#</th>
+                      <th style="width: 58px;">Status</th>
+                      <th style="width: 48px;">Method</th>
+                      <th style="width: 58px;">Offset</th>
+                      <th style="width: 48px;">Time</th>
+                      <th>Endpoint & Causality</th>
+                    </tr>
+                  </thead>
+                  <tbody id="networkTableBody">
+                    <!-- Populated dynamically via dashboard.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Lower: Lossless Request/Response Inspector -->
+              <div class="raw-inspector-box network-detail-box">
+                <div class="raw-inspector-header">
+                  <span id="selectedNetworkHeader">Select a request above to inspect</span>
+                  <button id="btnCopyNetworkJson" class="btn-micro" title="Copy Full Request/Response Payload">Copy JSON</button>
+                </div>
+                <div class="network-detail-tabs-bar">
+                  <button type="button" class="net-detail-tab active" data-detail-view="response">Response</button>
+                  <button type="button" class="net-detail-tab" data-detail-view="headers">Headers</button>
+                  <button type="button" class="net-detail-tab" data-detail-view="request">Request</button>
+                </div>
+                <pre class="raw-json-viewer network-json-viewer" id="networkDetailViewer">// Click any request above to view its headers, payload, and response</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: STORAGE & PERSISTENCE HUB -->
+      <section id="storageView" class="view-panel scrollable-view">
+        <div class="panel-header-bar">
+          <div class="panel-header-title">
+            <h1 class="header-main-title">Storage & Engine</h1>
+            <span class="counter-badge" id="storageAllocationBadge">0 MB Used</span>
+          </div>
+        </div>
+
+        <div class="storage-layout">
+          <!-- Storage Overview Card -->
+          <div class="storage-card">
+            <h2 class="storage-card-title">IndexedDB Storage Metrics</h2>
+            <p class="storage-card-desc">Session recordings, progressive snapshots, and causality buffers are saved securely inside your browser's local IndexedDB tier.</p>
+            
+            <div class="storage-metrics-grid">
+              <div class="metric-box">
+                <span class="metric-label">Stored Sessions</span>
+                <span class="metric-val" id="storageDomText">0</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-label">Total Events</span>
+                <span class="metric-val" id="storageMutText">0</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-label">Est. Disk Footprint</span>
+                <span class="metric-val" id="storagePayloadText">0 MB</span>
+              </div>
+            </div>
+
+            <div class="storage-actions">
+              <button id="btnExportAllBundle" class="btn btn-secondary">
+                <span>Export All Sessions (JSON Archive)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Retention & Data Management Card -->
+          <div class="storage-card">
+            <h2 class="storage-card-title">Data Management</h2>
+            <p class="storage-card-desc">Purge old sessions or perform a full zero-fill reset of the local recording database.</p>
+
+            <div class="storage-actions" style="margin-top: auto;">
+              <button id="btnClearStorageDb" class="btn btn-outline-danger" style="width: 100%;">
+                <span>Purge Entire IndexedDB Database</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Snapshot Offline Preview Modal -->
+  <div id="snapshotPreviewModal" class="snapshot-modal-overlay" style="display: none;">
+    <div class="snapshot-modal-container">
+      <div class="snapshot-modal-header">
+        <div class="snapshot-modal-title" id="snapshotModalTitle">Snapshot Preview</div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button id="btnOpenSnapshotNewTab" class="btn btn-secondary" style="padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px;" title="Open full snapshot in a new browser tab"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4H3V4h4M9 3h4v4M6.5 9.5L13 3"/></svg><span>New Tab</span></button>
+          <button id="btnDownloadSnapshotModal" class="btn btn-secondary" style="padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px;" title="Download standalone HTML file"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v9M4 8l4 4 4-4M2 14h12"/></svg><span>Download HTML</span></button>
+          <button id="btnCloseSnapshotModal" class="btn btn-secondary" style="padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l8 8M12 4l-8 8"/></svg><span>Close</span></button>
+        </div>
+      </div>
+      <iframe id="snapshotModalIframe" class="snapshot-modal-iframe"></iframe>
+    </div>
+  </div>
+
+  <!-- Load rrweb-player standalone UMD bundle -->
+  <script src="../vendor/rrweb-player.js"></script>
+  <!-- Load dashboard module -->
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

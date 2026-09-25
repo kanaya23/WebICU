@@ -1,1 +1,218 @@
-import{c as P,f as L,u as O,o as _,j as t,a as k,b as $,B as F,r as c,d as S,F as C,T as R,S as z,I as y,e as U,g as A,h as v,i as G,k as V,L as W,l as Z,R as H,C as K}from"../index.esm.js";import{C as q,R as a,L as m,E as h,S as J}from"../types.js";var[Q,X]=P({name:"StatStylesContext",errorMessage:`useStatStyles returned is 'undefined'. Seems you forgot to wrap the components in "<Stat />" `}),M=L(function(s,r){const n=O("Stat",s),i={position:"relative",flex:"1 1 0%",...n.container},{className:g,children:d,...p}=_(s);return t.jsx(Q,{value:n,children:t.jsx(k.div,{ref:r,...p,className:$("chakra-stat",g),__css:i,children:t.jsx("dl",{children:d})})})});M.displayName="Stat";var B=L(function(s,r){const n=X();return t.jsx(k.dd,{ref:r,...s,className:$("chakra-stat__number",s.className),__css:{...n.number,fontFeatureSettings:"pnum",fontVariantNumeric:"proportional-nums"}})});B.displayName="StatNumber";function N({diameter:e,onClick:s,children:r,title:n,...i}){return t.jsx(F,{w:`${e}rem`,h:`${e}rem`,padding:`${e/2}rem`,borderRadius:9999,textAlign:"center",bgColor:"gray.100",boxSizing:"content-box",onClick:s,title:n,...i,children:r})}const T=1e3,E=60*T,D=60*E;function Y(e){if(e<=0)return"00:00";const s=Math.floor(e/D);e=e%D;const r=Math.floor(e/E);e=e%E;const n=Math.floor(e/T);return s?`${x(s)}:${x(r)}:${x(n)}`:`${x(r)}:${x(n)}`}function x(e,s=2){let r=String(e);const n=Math.pow(10,s-1);if(e<n)for(;String(n).length>r.length;)r=`0${e}`;return r}function ee({startTime:e,ticking:s}){const[r,n]=c.useState(Date.now()-e);return c.useEffect(()=>{if(!s)return;const i=setInterval(()=>{n(Date.now()-e)},100);return()=>clearInterval(i)},[e,s]),t.jsx(M,{textAlign:"center",mt:4,children:t.jsx(B,{fontSize:"3xl",children:Y(r)})})}const l=3,f=new q;function te(){const[e,s]=c.useState(a.IDLE),[r,n]=c.useState(""),[i,g]=c.useState(0),[d,p]=c.useState(null);return c.useEffect(()=>{const b=o=>{const{status:u,startTimestamp:j,pausedTimestamp:w}=o;s(u),j&&w?g(Date.now()-w+j):j&&g(j)};S.storage.local.get(m.recorderStatus).then(o=>{!o||!o[m.recorderStatus]||b(o[m.recorderStatus])}),S.storage.local.onChanged.addListener(o=>{if(!o[m.recorderStatus])return;const u=o[m.recorderStatus].newValue;b(u),u.errorMessage&&n(u.errorMessage)}),f.on(h.SessionUpdated,o=>{p(o.session)})},[]),t.jsxs(C,{direction:"column",w:300,padding:"5%",children:[t.jsxs(C,{children:[t.jsx(R,{fontSize:"md",fontWeight:"bold",children:"RRWeb Recorder"}),t.jsx(J,{}),t.jsxs(z,{direction:"row",children:[t.jsx(y,{onClick:()=>{S.tabs.create({url:"/pages/index.html#/"})},size:"xs",icon:t.jsx(U,{}),"aria-label":"Session List",title:"Session List"}),t.jsx(y,{onClick:()=>{S.runtime.openOptionsPage()},size:"xs",icon:t.jsx(A,{}),"aria-label":"Settings button",title:"Settings"})]})]}),e!==a.IDLE&&i&&t.jsx(ee,{startTime:i,ticking:e===a.RECORDING}),t.jsxs(C,{justify:"center",gap:"10",mt:"5",mb:"5",children:[t.jsx(N,{diameter:l,title:e===a.IDLE?"Start Recording":"Stop Recording",onClick:()=>{e===a.IDLE?f.emit(h.StartButtonClicked,{}):f.emit(h.StopButtonClicked,{})},children:t.jsx(v,{w:`${l}rem`,h:`${l}rem`,borderRadius:e===a.IDLE?9999:6,margin:"0",bgColor:"red.500"})}),e!==a.IDLE&&t.jsx(N,{diameter:l,title:e===a.RECORDING?"Pause Recording":"Resume Recording",onClick:()=>{e===a.RECORDING?f.emit(h.PauseButtonClicked,{}):f.emit(h.ResumeButtonClicked,{})},children:t.jsxs(v,{w:`${l}rem`,h:`${l}rem`,borderRadius:9999,margin:"0",color:"gray.600",children:[[a.PAUSED,a.PausedSwitch].includes(e)&&t.jsx(G,{style:{paddingLeft:"0.5rem",width:"100%",height:"100%"}}),e===a.RECORDING&&t.jsx(V,{style:{width:"100%",height:"100%"}})]})})]}),d&&t.jsxs(R,{children:[t.jsx(R,{as:"b",children:"New Session: "}),t.jsx(W,{href:S.runtime.getURL(`pages/index.html#/session/${d.id}`),isExternal:!0,children:d.name})]}),r!==""&&t.jsxs(R,{color:"red.500",fontSize:"md",children:[r,t.jsx("br",{}),"Maybe refresh your current tab."]})]})}const I=document.getElementById("root");I&&Z(I).render(t.jsx(H.StrictMode,{children:t.jsx(K,{children:t.jsx(te,{})})}));
+// popup.js - Minimalist Bauhaus Popup Module
+let timerInterval = null;
+let currentStatus = 'IDLE';
+let startTimestamp = null;
+let accumulatedPausedMs = 0;
+let lastSessionId = null;
+
+const statusPill = document.getElementById('statusPill');
+const statusText = document.getElementById('statusText');
+const tabTitleEl = document.getElementById('tabTitle');
+const timerDisplay = document.getElementById('timerDisplay');
+const eventCountDisplay = document.getElementById('eventCountDisplay');
+const startBtn = document.getElementById('startBtn');
+const activeControls = document.getElementById('activeControls');
+const pauseBtn = document.getElementById('pauseBtn');
+const pauseBtnText = document.getElementById('pauseBtnText');
+const stopBtn = document.getElementById('stopBtn');
+const openDashboardBtn = document.getElementById('openDashboardBtn');
+const dispatchSection = document.getElementById('dispatchSection');
+const cdpEngineToggle = document.getElementById('cdpEngineToggle');
+const engineModeSub = document.getElementById('engineModeSub');
+
+function updateEngineToggleUI(isCdp) {
+  if (engineModeSub) {
+    engineModeSub.textContent = isCdp
+      ? 'CDP Debugger (Low-level engine)'
+      : 'Stealth MV3 (Silent)';
+  }
+}
+
+function formatDuration(ms) {
+  if (ms < 0) ms = 0;
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return [
+    hours.toString().padStart(2, '0'),
+    minutes.toString().padStart(2, '0'),
+    seconds.toString().padStart(2, '0')
+  ].join(':');
+}
+
+function updateTimer() {
+  if (currentStatus === 'RECORDING' && startTimestamp) {
+    const elapsed = Date.now() - startTimestamp - accumulatedPausedMs;
+    if (timerDisplay) timerDisplay.textContent = formatDuration(elapsed);
+  }
+}
+
+function renderState(state) {
+  currentStatus = state.status || 'IDLE';
+  startTimestamp = state.startTimestamp;
+  accumulatedPausedMs = state.accumulatedPausedMs || 0;
+  lastSessionId = state.sessionId;
+
+  if (statusPill) {
+    statusPill.className = 'status-pill';
+    if (currentStatus === 'RECORDING') {
+      statusPill.classList.add('status-recording');
+      if (statusText) statusText.textContent = 'REC';
+      if (startBtn) startBtn.style.display = 'none';
+      if (activeControls) activeControls.style.display = 'grid';
+      if (pauseBtnText) pauseBtnText.textContent = 'Pause';
+      if (dispatchSection) dispatchSection.classList.add('recording-active');
+    } else if (currentStatus === 'PAUSED') {
+      statusPill.classList.add('status-paused');
+      if (statusText) statusText.textContent = 'PAUSED';
+      if (startBtn) startBtn.style.display = 'none';
+      if (activeControls) activeControls.style.display = 'grid';
+      if (pauseBtnText) pauseBtnText.textContent = 'Resume';
+      if (dispatchSection) dispatchSection.classList.add('recording-active');
+    } else {
+      statusPill.classList.add('status-idle');
+      if (statusText) statusText.textContent = 'ARMED';
+      if (startBtn) startBtn.style.display = 'flex';
+      if (activeControls) activeControls.style.display = 'none';
+      if (timerDisplay) timerDisplay.textContent = '00:00:00';
+      if (dispatchSection) dispatchSection.classList.remove('recording-active');
+    }
+  }
+
+  const evCount = state.eventCount || 0;
+  if (eventCountDisplay) {
+    eventCountDisplay.textContent = `${evCount} event${evCount === 1 ? '' : 's'}`;
+  }
+
+  if (currentStatus !== 'IDLE' && state.sessionTitle && tabTitleEl) {
+    tabTitleEl.textContent = state.sessionTitle;
+  }
+
+  if (cdpEngineToggle) {
+    if (currentStatus !== 'IDLE') {
+      cdpEngineToggle.disabled = true;
+      if (state.useCdp !== undefined) {
+        cdpEngineToggle.checked = !!state.useCdp;
+        updateEngineToggleUI(!!state.useCdp);
+      }
+    } else {
+      cdpEngineToggle.disabled = false;
+    }
+  }
+
+  updateTimer();
+}
+
+async function fetchStatus() {
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+    chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (res) => {
+      if (chrome.runtime.lastError || !res) return;
+      renderState(res);
+    });
+  }
+}
+
+// Initialize popup
+async function init() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tabTitleEl) {
+      tabTitleEl.textContent = tab.title || tab.url || 'Active Tab';
+      tabTitleEl.title = tab.url || tab.title || '';
+    }
+  } catch (e) {}
+
+  if (cdpEngineToggle) {
+    try {
+      const data = await chrome.storage.local.get(['webicu_use_cdp', 'rrweb_use_cdp']);
+      const isCdp = !!(data.webicu_use_cdp || data.rrweb_use_cdp);
+      cdpEngineToggle.checked = isCdp;
+      updateEngineToggleUI(isCdp);
+
+      cdpEngineToggle.addEventListener('change', () => {
+        const checked = cdpEngineToggle.checked;
+        updateEngineToggleUI(checked);
+        chrome.storage.local.set({ webicu_use_cdp: checked });
+      });
+    } catch (_) {}
+  }
+
+  await fetchStatus();
+
+  // Poll status while popup is open to keep timer and count updated
+  timerInterval = setInterval(() => {
+    updateTimer();
+    fetchStatus();
+  }, 500);
+}
+
+if (startBtn) {
+  startBtn.addEventListener('click', async () => {
+    startBtn.disabled = true;
+    const useCdp = cdpEngineToggle ? cdpEngineToggle.checked : false;
+    chrome.runtime.sendMessage({ type: 'START_RECORDING', useCdp }, (res) => {
+      startBtn.disabled = false;
+      if (res && res.success) {
+        fetchStatus();
+      } else if (res && res.error) {
+        alert('Could not start recording: ' + res.error);
+      }
+    });
+  });
+}
+
+if (pauseBtn) {
+  pauseBtn.addEventListener('click', async () => {
+    pauseBtn.disabled = true;
+    const msgType = currentStatus === 'PAUSED' ? 'RESUME_RECORDING' : 'PAUSE_RECORDING';
+    chrome.runtime.sendMessage({ type: msgType }, () => {
+      pauseBtn.disabled = false;
+      fetchStatus();
+    });
+  });
+}
+
+if (stopBtn) {
+  stopBtn.addEventListener('click', async () => {
+    stopBtn.disabled = true;
+    if (statusText) statusText.textContent = 'SAVING...';
+
+    let didHandle = false;
+    const finishStop = (sessionId) => {
+      if (didHandle) return;
+      didHandle = true;
+      stopBtn.disabled = false;
+      const targetSessionId = sessionId || lastSessionId;
+      if (targetSessionId) {
+        chrome.runtime.sendMessage({ type: 'OPEN_DASHBOARD', sessionId: targetSessionId });
+        window.close();
+      } else {
+        fetchStatus();
+      }
+    };
+
+    // Safety watchdog: never leave user stuck on disabled grey screen
+    const safetyTimer = setTimeout(() => {
+      finishStop(lastSessionId);
+    }, 2000);
+
+    chrome.runtime.sendMessage({ type: 'STOP_RECORDING' }, (res) => {
+      clearTimeout(safetyTimer);
+      finishStop(res && res.sessionId);
+    });
+  });
+}
+
+if (openDashboardBtn) {
+  openDashboardBtn.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'OPEN_DASHBOARD' });
+    window.close();
+  });
+}
+
+window.addEventListener('unload', () => {
+  if (timerInterval) clearInterval(timerInterval);
+});
+
+init();

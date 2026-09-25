@@ -1,21 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RRWeb Recorder</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="/pages/bauhaus.css" />
-
-  <script type="module" crossorigin src="/popup/popup.js"></script>
-  <link rel="modulepreload" crossorigin href="/index.esm.js">
-  <link rel="modulepreload" crossorigin href="/types.js">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebICU // Recorder</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="icon" type="image/svg+xml" href="../icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="48x48" href="../icons/icon48.png">
+  <link rel="shortcut icon" href="../icons/icon48.png">
 </head>
-<body class="popup-body">
-  <div id="root"></div>
+<body>
+  <div class="popup-container">
+    <!-- Minimalist Bauhaus Header -->
+    <header class="header">
+      <div class="header-brand">
+        <img src="../icons/icon48.png" alt="WebICU" width="22" height="22" class="brand-logo" style="border-radius: 4px; display: block;">
+        <span class="brand-title">WebICU</span>
+      </div>
+      <div id="statusPill" class="status-pill status-idle">
+        <span class="status-dot"></span>
+        <span id="statusText">Armed</span>
+      </div>
+    </header>
+
+    <!-- Target Tab Info -->
+    <div class="tab-card">
+      <span class="tab-label">Target Page</span>
+      <div id="tabTitle" class="tab-title" title="Loading...">Connecting to active page...</div>
+    </div>
+
+    <!-- Engine Mode Toggle (Stealth vs CDP Debugger) -->
+    <div class="engine-toggle-card">
+      <div class="toggle-meta">
+        <span class="toggle-name">Engine Mode</span>
+        <span class="toggle-sub" id="engineModeSub">Stealth MV3 (Silent)</span>
+      </div>
+      <label class="switch" title="Toggle between Stealth MV3 and CDP Debugger engine">
+        <input type="checkbox" id="cdpEngineToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Central Recording Unit -->
+    <div class="record-core" id="dispatchSection">
+      <div id="timerDisplay" class="timer-digits">00:00:00</div>
+      <div id="eventCountDisplay" class="event-count-badge">0 events</div>
+    </div>
+
+    <!-- Action Controls -->
+    <div class="action-buttons">
+      <!-- When IDLE -->
+      <button id="startBtn" class="btn btn-primary btn-record">
+        <span class="rec-dot"></span>
+        <span>Start Recording</span>
+      </button>
+
+      <!-- When RECORDING / PAUSED -->
+      <div id="activeControls" class="btn-group" style="display: none;">
+        <button id="pauseBtn" class="btn btn-secondary">
+          <span id="pauseBtnText">Pause</span>
+        </button>
+        <button id="stopBtn" class="btn btn-danger">
+          <span>Stop & Save</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <footer class="footer">
+      <button id="openDashboardBtn" class="btn-dashboard">
+        <span>Studio Dashboard</span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
 </body>
 </html>
